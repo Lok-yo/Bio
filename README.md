@@ -1,56 +1,83 @@
-# Welcome to your Expo app 👋
+# Bio
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Bio es una bóveda privada para Android e iOS. Protege fotos, vídeos y documentos detrás de la biometría del dispositivo y mantiene el contenido dentro del almacenamiento privado de la aplicación.
 
-## Get started
+## Funciones
 
-1. Install dependencies
+- Desbloqueo con huella dactilar, Face ID o la biometría disponible en el dispositivo.
+- Bóveda vacía en la primera instalación.
+- Importación múltiple de fotos, vídeos y documentos.
+- Copia al almacenamiento privado de Bio y eliminación del original cuando el proveedor del sistema lo permite.
+- Miniaturas y vista previa de imágenes, incluso cuando se importan desde el administrador de archivos.
+- Restauración de fotos y vídeos a la biblioteca multimedia.
+- Restauración de documentos a una carpeta elegida desde el administrador de archivos.
+- Eliminación manual del contenido protegido.
+- Bloqueo al salir de la aplicación y al volver a ella. Los selectores de archivos, permisos y diálogos del sistema no provocan bloqueos repetidos.
 
-   ```bash
-   npm install
-   ```
+## Limitación de Google Photos
 
-2. Start the app
+Google Photos no siempre entrega una referencia que permita a una aplicación externa eliminar el original de la biblioteca multimedia. Si Bio muestra el aviso **“El original no se borró”**, el contenido sí quedó protegido, pero el original todavía permanece en el dispositivo.
 
-   ```bash
-   npx expo start
-   ```
+Para retirar también el original, vuelve a pulsar **Añadir → Documento o imagen** y selecciónalo directamente desde **Archivos** o el administrador de archivos del teléfono. Bio detectará las extensiones de imagen y conservará la miniatura, la vista previa y la opción **Restaurar**.
 
-In the output, you'll find options to open the app in a
+## Requisitos
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+- Node.js LTS.
+- Un dispositivo físico con biometría configurada para probar el desbloqueo.
+- Expo SDK 57.
+- Para probar el acceso completo a la biblioteca multimedia en Android, un development build. Expo Go tiene acceso limitado a estas APIs en versiones recientes de Android.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Desarrollo local
 
-## Get a fresh project
-
-When you're ready, run:
+Instala las dependencias:
 
 ```bash
-npm run reset-project
+npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Inicia el servidor para un development build:
 
-### Other setup steps
+```bash
+npx expo start --dev-client
+```
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+También se puede usar Expo Go para revisar la interfaz, pero las funciones de eliminación y restauración de la biblioteca multimedia requieren el development build.
 
-## Learn more
+## Validación
 
-To learn more about developing your project with Expo, look at the following resources:
+```bash
+npx tsc --noEmit
+npm run lint
+npx expo export --platform web
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Development build en EAS
 
-## Join the community
+El perfil `development` genera un APK instalable con el cliente de desarrollo:
 
-Join our community of developers creating universal apps.
+```bash
+npx eas build --profile development --platform android
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+El proyecto de EAS está configurado en `eas.json`. El identificador Android es `com.lkiyo.bio`.
+
+## Estructura principal
+
+```text
+src/app/index.tsx          Interfaz de la bóveda y flujos de importación
+src/context/vault-context.tsx
+                            Estado, biometría, bloqueo y operaciones de la bóveda
+src/lib/vault-storage.ts   Almacenamiento privado, MediaStore y SAF en Android
+src/lib/vault-storage.web.ts
+                            Implementación compatible con web
+app.json                   Permisos y plugins nativos de Expo
+eas.json                   Perfil del development build
+```
+
+## Privacidad y almacenamiento
+
+El índice de elementos se guarda con `expo-secure-store` y los archivos se copian al directorio privado de la aplicación mediante `expo-file-system`. La eliminación del original depende de los permisos y capacidades del proveedor que abrió el archivo. Bio no sube el contenido a un servidor.
+
+## Licencia
+
+Este proyecto se distribuye bajo la licencia incluida en [`LICENSE`](./LICENSE).

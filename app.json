@@ -8,7 +8,10 @@
     "scheme": "bio",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -17,7 +20,12 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT"
+      ],
+      "package": "com.lkiyo.bio"
     },
     "web": {
       "output": "static",
@@ -32,11 +40,32 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Bio usa Face ID para proteger tus fotos, vídeos y documentos."
+        }
+      ],
+      "expo-secure-store",
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Bio necesita acceso a tus fotos y vídeos para moverlos a tu bóveda privada.",
+          "savePhotosPermission": "Bio necesita permiso para restaurar fotos y vídeos en tu galería.",
+          "granularPermissions": ["photo", "video"]
+        }
       ]
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "0b4a2a29-fec0-4f36-82a7-3d784980efa9"
+      }
     }
   }
 }

@@ -1,180 +1,123 @@
-import { Image } from 'expo-image';
-import { SymbolView } from 'expo-symbols';
-import { Platform, Pressable, ScrollView, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { StatusBar } from 'expo-status-bar';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { ExternalLink } from '@/components/external-link';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Collapsible } from '@/components/ui/collapsible';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
+import { useVault } from '@/context/vault-context';
 
-export default function TabTwoScreen() {
-  const safeAreaInsets = useSafeAreaInsets();
-  const insets = {
-    ...safeAreaInsets,
-    bottom: safeAreaInsets.bottom + BottomTabInset + Spacing.three,
-  };
-  const theme = useTheme();
+const COLORS = {
+  ink: '#1C2421',
+  muted: '#72807B',
+  paper: '#F6F7F4',
+  card: '#FFFFFF',
+  line: '#E7EBE7',
+  green: '#2F8064',
+  greenSoft: '#E2F0E9',
+  dark: '#16251F',
+};
 
-  const contentPlatformStyle = Platform.select({
-    android: {
-      paddingTop: insets.top,
-      paddingLeft: insets.left,
-      paddingRight: insets.right,
-      paddingBottom: insets.bottom,
-    },
-    web: {
-      paddingTop: Spacing.six,
-      paddingBottom: Spacing.four,
-    },
-  });
+export default function SettingsScreen() {
+  const insets = useSafeAreaInsets();
+  const { biometricLabel, status, isUnlocked, openDeviceSettings, lock } = useVault();
+  const active = status === 'ready' && isUnlocked;
 
   return (
-    <ScrollView
-      style={[styles.scrollView, { backgroundColor: theme.background }]}
-      contentInset={insets}
-      contentContainerStyle={[styles.contentContainer, contentPlatformStyle]}>
-      <ThemedView style={styles.container}>
-        <ThemedView style={styles.titleContainer}>
-          <ThemedText type="subtitle">Explore</ThemedText>
-          <ThemedText style={styles.centerText} themeColor="textSecondary">
-            This starter app includes example{'\n'}code to help you get started.
-          </ThemedText>
+    <View style={styles.root}>
+      <StatusBar style="dark" />
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={[styles.content, { paddingTop: insets.top + 18, paddingBottom: insets.bottom + 94 }]}>
+        <View style={styles.headerRow}>
+          <View>
+            <Text style={styles.eyebrow}>BIO · CONFIGURACIÓN</Text>
+            <Text style={styles.title}>Controla tu privacidad.</Text>
+          </View>
+          <View style={styles.settingsIcon}><Ionicons name="options-outline" size={22} color={COLORS.green} /></View>
+        </View>
 
-          <ExternalLink href="https://docs.expo.dev" asChild>
-            <Pressable style={({ pressed }) => pressed && styles.pressed}>
-              <ThemedView type="backgroundElement" style={styles.linkButton}>
-                <ThemedText type="link">Expo documentation</ThemedText>
-                <SymbolView
-                  tintColor={theme.text}
-                  name={{ ios: 'arrow.up.right.square', android: 'link', web: 'link' }}
-                  size={12}
-                />
-              </ThemedView>
-            </Pressable>
-          </ExternalLink>
-        </ThemedView>
+        <View style={styles.securityCard}>
+          <View style={styles.securityIcon}><Ionicons name="shield-checkmark" size={25} color={COLORS.green} /></View>
+          <View style={styles.securityCopy}>
+            <Text style={styles.securityTitle}>Protección biométrica</Text>
+            <Text style={styles.securityDescription}>{active ? `Activa con ${biometricLabel}` : 'Requiere configuración en tu dispositivo'}</Text>
+          </View>
+          <View style={[styles.statusPill, !active && styles.statusPillOff]}>
+            <View style={[styles.statusDot, !active && styles.statusDotOff]} />
+            <Text style={[styles.statusText, !active && styles.statusTextOff]}>{active ? 'ACTIVA' : 'PENDIENTE'}</Text>
+          </View>
+        </View>
 
-        <ThemedView style={styles.sectionsWrapper}>
-          <Collapsible title="File-based routing">
-            <ThemedText type="small">
-              This app has two screens: <ThemedText type="code">src/app/index.tsx</ThemedText> and{' '}
-              <ThemedText type="code">src/app/explore.tsx</ThemedText>
-            </ThemedText>
-            <ThemedText type="small">
-              The layout file in <ThemedText type="code">src/app/_layout.tsx</ThemedText> sets up
-              the tab navigator.
-            </ThemedText>
-            <ExternalLink href="https://docs.expo.dev/router/introduction">
-              <ThemedText type="linkPrimary">Learn more</ThemedText>
-            </ExternalLink>
-          </Collapsible>
+        <Text style={styles.sectionLabel}>SEGURIDAD</Text>
+        <View style={styles.menuCard}>
+          <Pressable style={styles.menuRow} onPress={() => void openDeviceSettings()}>
+            <View style={[styles.menuIcon, { backgroundColor: '#E6F2EC' }]}><Ionicons name="finger-print-outline" size={21} color={COLORS.green} /></View>
+            <View style={styles.menuCopy}>
+              <Text style={styles.menuTitle}>Configurar biometría</Text>
+              <Text style={styles.menuSub}>Gestiona huella o reconocimiento facial</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color="#9BA8A2" />
+          </Pressable>
+          <View style={styles.separator} />
+          <Pressable style={styles.menuRow} onPress={lock}>
+            <View style={[styles.menuIcon, { backgroundColor: '#F1ECE4' }]}><Ionicons name="lock-closed-outline" size={21} color="#A47531" /></View>
+            <View style={styles.menuCopy}>
+              <Text style={styles.menuTitle}>Bloquear ahora</Text>
+              <Text style={styles.menuSub}>Pide biometría la próxima vez que abras la bóveda</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color="#9BA8A2" />
+          </Pressable>
+        </View>
 
-          <Collapsible title="Android, iOS, and web support">
-            <ThemedView type="backgroundElement" style={styles.collapsibleContent}>
-              <ThemedText type="small">
-                You can open this project on Android, iOS, and the web. To open the web version,
-                press <ThemedText type="smallBold">w</ThemedText> in the terminal running this
-                project.
-              </ThemedText>
-              <Image
-                source={require('@/assets/images/tutorial-web.png')}
-                style={styles.imageTutorial}
-              />
-            </ThemedView>
-          </Collapsible>
+        <Text style={styles.sectionLabel}>SOBRE BIO</Text>
+        <View style={styles.infoCard}>
+          <View style={styles.infoRow}>
+            <Ionicons name="phone-portrait-outline" size={19} color={COLORS.green} />
+            <Text style={styles.infoText}>Tus archivos se guardan únicamente en este dispositivo.</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Ionicons name="key-outline" size={19} color={COLORS.green} />
+            <Text style={styles.infoText}>El índice de tu bóveda se almacena con SecureStore.</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Ionicons name="eye-off-outline" size={19} color={COLORS.green} />
+            <Text style={styles.infoText}>Bio no sube tu contenido a ningún servidor.</Text>
+          </View>
+        </View>
 
-          <Collapsible title="Images">
-            <ThemedText type="small">
-              For static images, you can use the <ThemedText type="code">@2x</ThemedText> and{' '}
-              <ThemedText type="code">@3x</ThemedText> suffixes to provide files for different
-              screen densities.
-            </ThemedText>
-            <Image source={require('@/assets/images/react-logo.png')} style={styles.imageReact} />
-            <ExternalLink href="https://reactnative.dev/docs/images">
-              <ThemedText type="linkPrimary">Learn more</ThemedText>
-            </ExternalLink>
-          </Collapsible>
-
-          <Collapsible title="Light and dark mode components">
-            <ThemedText type="small">
-              This template has light and dark mode support. The{' '}
-              <ThemedText type="code">useColorScheme()</ThemedText> hook lets you inspect what the
-              user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-            </ThemedText>
-            <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-              <ThemedText type="linkPrimary">Learn more</ThemedText>
-            </ExternalLink>
-          </Collapsible>
-
-          <Collapsible title="Animations">
-            <ThemedText type="small">
-              This template includes an example of an animated component. The{' '}
-              <ThemedText type="code">src/components/ui/collapsible.tsx</ThemedText> component uses
-              the powerful <ThemedText type="code">react-native-reanimated</ThemedText> library to
-              animate opening this hint.
-            </ThemedText>
-          </Collapsible>
-        </ThemedView>
-        {Platform.OS === 'web' && <WebBadge />}
-      </ThemedView>
-    </ScrollView>
+        <Text style={styles.version}>BIO · bóveda privada · v1.0</Text>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  scrollView: {
-    flex: 1,
-  },
-  contentContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-  },
-  container: {
-    maxWidth: MaxContentWidth,
-    flexGrow: 1,
-  },
-  titleContainer: {
-    gap: Spacing.three,
-    alignItems: 'center',
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.six,
-  },
-  centerText: {
-    textAlign: 'center',
-  },
-  pressed: {
-    opacity: 0.7,
-  },
-  linkButton: {
-    flexDirection: 'row',
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.two,
-    borderRadius: Spacing.five,
-    justifyContent: 'center',
-    gap: Spacing.one,
-    alignItems: 'center',
-  },
-  sectionsWrapper: {
-    gap: Spacing.five,
-    paddingHorizontal: Spacing.four,
-    paddingTop: Spacing.three,
-  },
-  collapsibleContent: {
-    alignItems: 'center',
-  },
-  imageTutorial: {
-    width: '100%',
-    aspectRatio: 296 / 171,
-    borderRadius: Spacing.three,
-    marginTop: Spacing.two,
-  },
-  imageReact: {
-    width: 100,
-    height: 100,
-    alignSelf: 'center',
-  },
+  root: { flex: 1, backgroundColor: COLORS.paper },
+  content: { paddingHorizontal: 20 },
+  headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 26 },
+  eyebrow: { color: COLORS.green, fontSize: 9, fontWeight: '800', letterSpacing: 1.4 },
+  title: { color: COLORS.ink, fontSize: 28, lineHeight: 33, fontWeight: '800', letterSpacing: -0.8, marginTop: 8, maxWidth: 280 },
+  settingsIcon: { width: 46, height: 46, borderRadius: 16, backgroundColor: COLORS.greenSoft, alignItems: 'center', justifyContent: 'center' },
+  securityCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.dark, padding: 16, borderRadius: 19 },
+  securityIcon: { width: 46, height: 46, borderRadius: 15, backgroundColor: '#C9E7D8', alignItems: 'center', justifyContent: 'center' },
+  securityCopy: { flex: 1, paddingLeft: 12 },
+  securityTitle: { color: '#F4FAF6', fontSize: 14, fontWeight: '800' },
+  securityDescription: { color: '#AFC5B9', fontSize: 11, marginTop: 5 },
+  statusPill: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: 'rgba(201, 231, 216, 0.15)', paddingHorizontal: 8, paddingVertical: 6, borderRadius: 99 },
+  statusPillOff: { backgroundColor: 'rgba(255, 217, 189, 0.14)' },
+  statusDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#8CD1B0' },
+  statusDotOff: { backgroundColor: '#E6AF83' },
+  statusText: { color: '#BCE6D1', fontSize: 8, fontWeight: '800', letterSpacing: 0.8 },
+  statusTextOff: { color: '#FFD9BD' },
+  sectionLabel: { color: COLORS.muted, fontSize: 9, fontWeight: '800', letterSpacing: 1.3, marginTop: 29, marginBottom: 11 },
+  menuCard: { backgroundColor: COLORS.card, borderRadius: 18, borderWidth: 1, borderColor: COLORS.line, paddingHorizontal: 14 },
+  menuRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 14 },
+  menuIcon: { width: 42, height: 42, borderRadius: 13, alignItems: 'center', justifyContent: 'center' },
+  menuCopy: { flex: 1, paddingLeft: 12, paddingRight: 8 },
+  menuTitle: { color: COLORS.ink, fontSize: 13, fontWeight: '800' },
+  menuSub: { color: COLORS.muted, fontSize: 10, lineHeight: 15, marginTop: 4 },
+  separator: { height: 1, backgroundColor: COLORS.line, marginLeft: 54 },
+  infoCard: { backgroundColor: COLORS.card, borderRadius: 18, borderWidth: 1, borderColor: COLORS.line, padding: 16, gap: 16 },
+  infoRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  infoText: { flex: 1, color: COLORS.muted, fontSize: 12, lineHeight: 17 },
+  version: { textAlign: 'center', color: '#AAB4AE', fontSize: 10, marginTop: 31 },
 });
