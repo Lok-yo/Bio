@@ -1,6 +1,6 @@
 # Bio
 
-Bio es una bóveda privada para Android e iOS. Protege fotos, vídeos y documentos detrás de la biometría del dispositivo y mantiene el contenido dentro del almacenamiento privado de la aplicación.
+Bio es una bóveda privada para Android. Protege fotos, vídeos y documentos detrás de la biometría del dispositivo y mantiene el contenido dentro del almacenamiento privado de la aplicación.
 
 ## Funciones
 
